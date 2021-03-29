@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<FlowCallout async="false" continueOnError="false" enabled="true" name="FC-BackendConfiguration">
+    <DisplayName>FC-BackendConfiguration</DisplayName>
+    <FaultRules/>
+    <Parameters>
+        <Parameter name="backendconfiguration.targetname">${targetServer}</Parameter> 
+    </Parameters>
+    <Properties/>
+    <SharedFlowBundle>
+#if($tsAuthType == "basic")
+        sf-backendconfiguration-basic-v1
+#elseif($tsAuthType == "salesforce")
+        sf-backendconfiguration-salesforce-v1
+#end
+    </SharedFlowBundle> 
+</FlowCallout>

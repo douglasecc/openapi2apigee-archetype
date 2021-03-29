@@ -1,0 +1,244 @@
+\#Author: ${emailDev}
+\#Date: $date
+@apiproxy
+Feature: API proxy endpoints - ${artifactId} GET
+
+    @services @GET
+    Scenario: 0. Prep variables
+        Given I set variable validQueryParam   in global scope to cnpj=40432544000147
+          And I set variable invalidQueryParam in global scope to cnpj=11111111111111
+
+#if(${authtype} == "oauth2")
+    @200 
+    Scenario: 0. Obter Token - json response
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                              |
+              |`authHeaderName`|`authHeaderValue`                   |
+              | Content-Type   | application/x-www-form-urlencoded  |
+          And I set body to grant_type=client_credentials
+         When I POST to /oauth2/v1/token
+         Then response code should be 200
+          And response body should be valid json
+          And I store the value of body path \$.access_token as x_client_auth_access_token in global scope
+#end
+    @200
+    Scenario: 1. 200 Test / GET endpoint - json response
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | X-QueryString  |`validQueryParam`                    |
+         When I GET ${basepath}
+         Then response code should be 200
+          And response body should be valid json
+          And response body path \$.data.resultCode should be 0
+          And response header content-type should not be null
+
+    @400
+    Scenario: 2. 400 Test / GET endpoint - validation payload error
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | X-QueryString  |`invalidQueryParam`                  |
+              | x-mock         | 400                                 |
+         When I GET ${basepath}
+         Then response code should be 400
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 400
+          And response header X-TransactionId should be (.+)
+
+    @401
+    Scenario: 3. 401 Test / GET endpoint - Bad client authentication header
+        Given I set headers to
+              | name             | value              |
+              | Content-Type     | application/json   |
+              | X-QueryString    |`invalidQueryParam` |
+         When I GET ${basepath}
+         Then response code should be 401
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 401
+          And response body path \$.error.errorCode should be API-(.*)-401
+          And response header X-TransactionId should be (.+)
+
+#if(${authtype} == "oauth2")
+    @403
+    Scenario: 4.0 403 Test / POST endpoint - App with no permissions
+        Given I use variables from app ${artifactId}-app-np
+          And I set headers to
+              | name           | value                              |
+              |`authHeaderName`|`authHeaderValue`                   |
+              | Content-Type   | application/x-www-form-urlencoded  |
+          And I set body to grant_type=client_credentials
+         When I POST to /oauth2/v1/token
+         Then response code should be 200
+          And response body should be valid json
+          And I store the value of body path \$.access_token as x_client_auth_access_token_np in global scope
+#end
+
+    @403
+    Scenario: 4.1 403 Test / GET endpoint - App with no permissions
+        Given I use variables from app ${artifactId}-app-np
+          And I set headers to
+              | name           | value                                  |
+              | Content-Type   | application/json                       |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token_np` |
+#else
+              |`authHeaderName`|`authHeaderValue`                       |
+#end
+              | X-QueryString  |`invalidQueryParam`                     |
+         When I GET ${basepath}
+         Then response code should be 403
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 403
+          And response body path \$.error.errorCode should be API-(.*)-403
+          And response body path \$.error.message should be (.*)
+          And response header X-TransactionId should be (.+)
+
+    @404
+    Scenario: 5. 404 Test / GET - NOT FOUND
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | X-QueryString  |`invalidQueryParam`                  |
+         When I GET ${basepath}/teste
+         Then response code should be 404
+
+    @405
+    Scenario: 6. 405 Test / DELETE endpoint - wrong method
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | X-QueryString  |`invalidQueryParam`                  |
+         When I DELETE ${basepath}
+         Then response code should be 405
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 405
+          And response body path \$.error.errorCode should be API-(.*)-405
+          And response body path \$.error.message should be (.*)
+          And response header X-TransactionId should be (.+)
+          And response header accept should not exist
+
+    @405
+    Scenario: 6. 405 Test / PUT endpoint - wrong method
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | X-QueryString  |`invalidQueryParam`                  |
+         When I PUT ${basepath}
+         Then response code should be 405
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 405
+          And response body path \$.error.errorCode should be API-(.*)-405
+          And response body path \$.error.message should be (.*)
+          And response header X-TransactionId should be (.+)
+          And response header accept should not exist
+
+    @405
+    Scenario: 7. 405 Test / PATCH endpoint - wrong method
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | X-QueryString  |`invalidQueryParam`                  |
+         When I PATCH ${basepath}
+         Then response code should be 405
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 405
+          And response body path \$.error.errorCode should be API-(.*)-405
+          And response body path \$.error.message should be (.*)
+          And response header X-TransactionId should be (.+)
+          And response header accept should not exist
+
+    @500
+    Scenario: 9. 500 Test / GET endpoint - Backend internal error
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | x-mock         | 500                                 |
+              | X-QueryString  |`invalidQueryParam`                  |
+         When I GET ${basepath}
+         Then response code should be 500
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 500
+          And response body path \$.error.errorCode should be API-(.*)-500
+          And response body path \$.error.message should be (.*)
+          And response header X-TransactionId should be (.+)
+          And response header accept should not exist
+
+#if(${authtype} == "oauth2")
+    @429
+    Scenario: 10.0 429 Test / GET endpoint - quota check
+        Given I use variables from app ${artifactId}-app-nq
+          And I set headers to
+              | name           | value                              |
+              |`authHeaderName`|`authHeaderValue`                   |
+              | Content-Type   | application/x-www-form-urlencoded  |
+          And I set body to grant_type=client_credentials
+         When I POST to /oauth2/v1/token
+         Then response code should be 200
+          And response body should be valid json
+          And I store the value of body path \$.access_token as x_client_auth_access_token_nq in global scope
+#end
+
+    @429
+    Scenario: 10.1 429 Test / GET endpoint - quota check
+        Given I use variables from app ${artifactId}-app-nq
+          And I set headers to
+              | name           | value                                  |
+              | Content-Type   | application/json                       |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token_nq` |
+#else
+              |`authHeaderName`|`authHeaderValue`                       |
+#end
+              | X-QueryString  |`invalidQueryParam`                     |
+         When I GET ${basepath}
+          And I GET ${basepath}
+          And I GET ${basepath}
+         Then response code should be 429
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 429
+          And response body path \$.error.errorCode should be API-(.*)-429
+          And response header X-TransactionId should be (.+)

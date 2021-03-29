@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage async="false" continueOnError="false" enabled="true" name="AM-SetAcceptHeader">
+    <DisplayName>AM-SetAcceptHeader</DisplayName>
+    <AssignVariable>
+        <Name>request.header.Accept</Name>
+        <Value>application/json</Value>
+    </AssignVariable>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    <AssignTo createNew="false" transport="http" type="request">request</AssignTo>
+</AssignMessage>

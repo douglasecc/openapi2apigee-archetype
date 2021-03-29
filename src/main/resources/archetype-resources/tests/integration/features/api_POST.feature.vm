@@ -1,0 +1,96 @@
+\#Author: ${emailDev}
+\#Date: $date
+@apiproxy
+Feature: API proxy endpoints - ${artifactId} POST
+
+    @services @POST
+    Scenario: 0. Prep variables
+        Given I set variable bodyValid   in global scope to {"data":{"providerId":"string","serviceName":"string","operatorId":"string","country":"string","correlatorId":"TP000002322017022409365100021","subscriber":{"title":"string","firstName":"string","lastName":"string","gender":"string","nationality":"string","address":{"addressLine1":"string","addressLine2":"string","city":"string","state":"MG","postalCode":"string","countryM2M":"string","fiscalCode":"string"},"communication":{"email":"user@example.com","mobilePhone":"string"},"preferredLanguageCode":"string","idVersion":"string","idIssueDate":"2020-09-08","idExpiryDate":"2020-09-08","idIssuingEntity":"string","idCountryOfIssue":"string","idFirstName":"string","idLastName":"string","idStateOfIssue":"string","visaNumber":"string","visaGrantNumber":"string","visaExpiryDate":"string"},"termsAndConditions":{"consent":"string","consentTimeStamp":"string","documentCode":"string","documentVersion":"string","documentLanguage":"string","validationIdType":"string"},"mnoSubscriber":{"dateOfBirth":"2020-09-08","placeOfBirth":"string","idType":"string","idValue":"string"},"sales":{"productId":"string","payment":{"currency":"string","purchaseAmount":"string","cardToken":"string","transactionReference":"string"}},"device":{"msisdn":"string","iccid":"string","imsi":"string"},"extensionInfo":[{"key":"string","value":"string"}]}}
+          And I set variable bodyInvalid in global scope to {"data":{"operatorId":"string","country":"string","correlatorId":"TP000002322017022409365100021","subscriber":{"title":"string","firstName":"string","lastName":"string","gender":"string","nationality":"string","address":{"addressLine1":"string","addressLine2":"string","city":"string","state":"MG","postalCode":"string","countryM2M":"string","fiscalCode":"string"},"communication":{"email":"user@example.com","mobilePhone":"string"},"preferredLanguageCode":"string","idVersion":"string","idIssueDate":"2020-09-08","idExpiryDate":"2020-09-08","idIssuingEntity":"string","idCountryOfIssue":"string","idFirstName":"string","idLastName":"string","idStateOfIssue":"string","visaNumber":"string","visaGrantNumber":"string","visaExpiryDate":"string"},"termsAndConditions":{"consent":"string","consentTimeStamp":"string","documentCode":"string","documentVersion":"string","documentLanguage":"string","validationIdType":"string"},"mnoSubscriber":{"dateOfBirth":"2020-09-08","placeOfBirth":"string","idType":"string","idValue":"string"},"sales":{"productId":"string","payment":{"currency":"string","purchaseAmount":"string","cardToken":"string","transactionReference":"string"}},"device":{"msisdn":"string","iccid":"string","imsi":"string"},"extensionInfo":[{"key":"string","value":"string"}]}}
+
+#if(${authtype} == "oauth2")
+    @200 
+    Scenario: 0. Obter Token - json response
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                              |
+              |`authHeaderName`|`authHeaderValue`                   |
+              | Content-Type   | application/x-www-form-urlencoded  |
+          And I set body to grant_type=client_credentials
+         When I POST to /oauth2/v1/token
+         Then response code should be 200
+          And response body should be valid json
+          And I store the value of body path \$.access_token as x_client_auth_access_token in global scope
+#end
+    @200
+    Scenario: 1. 200 Test / POST endpoint - json response
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+          And I set body to `bodyValid`
+         When I POST to ${basepath}
+         Then response code should be 200
+          And response body should be valid json
+          And response body path \$.data.resultCode should be 0
+          And response header content-type should not be null
+
+    @400
+    Scenario: 2. 400 Test / POST endpoint - validation payload error
+        Given I use variables from app ${artifactId}-app
+          And I set headers to
+              | name           | value                               |
+              | Content-Type   | application/json                    |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token` |
+#else
+              |`authHeaderName`|`authHeaderValue`                    |
+#end
+              | x-mock         | 400                                 |
+          And I set body to `bodyInvalid`
+         When I POST to ${basepath}
+         Then response code should be 400
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 400
+          And response header X-TransactionId should be (.+)
+
+#if(${authtype} == "oauth2")
+    @429
+    Scenario: 10.0 429 Test / POST endpoint - quota check
+        Given I use variables from app ${artifactId}-app-nq
+          And I set headers to
+              | name           | value                              |
+              |`authHeaderName`|`authHeaderValue`                   |
+              | Content-Type   | application/x-www-form-urlencoded  |
+          And I set body to grant_type=client_credentials
+         When I POST to /oauth2/v1/token
+         Then response code should be 200
+          And response body should be valid json
+          And I store the value of body path \$.access_token as x_client_auth_access_token_nq in global scope
+#end
+
+    @429
+    Scenario: 10.1 429 Test / POST endpoint - quota check
+        Given I use variables from app ${artifactId}-app-nq
+          And I set headers to
+              | name           | value                                  |
+              | Content-Type   | application/json                       |
+#if(${authtype} == "oauth2")
+              | x-client-auth  | Bearer `x_client_auth_access_token_nq` |
+#else
+              |`authHeaderName`|`authHeaderValue`                       |
+#end
+          And I set body to `bodyValid`
+         When I POST to ${basepath}
+          And I POST to ${basepath}
+          And I POST to ${basepath}
+         Then response code should be 429
+          And response body should be valid json
+          And response body path \$.error.httpCode should be 429
+          And response body path \$.error.errorCode should be API-(.*)-429
+          And response header X-TransactionId should be (.+)

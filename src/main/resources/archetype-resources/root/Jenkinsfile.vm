@@ -1,0 +1,35 @@
+@Library('SharedLibraryApiV2@release') _
+node {
+	stage('Call ') {
+        try {
+            commonJenkinsfile(
+                criticidade: "BAIXA",                                   // Opcional - 'BAIXA' || >'MEDIA' || 'ALTA'
+                nova_corretiva : "NOVA",                                // Opcional - >'NOVA' || 'CORRETIVA'
+                indisponibilidade: "NAO",                               // Opcional - 'NAO' || >'SIM'
+                dependencias: "NAO",                                    // Opcional - >'NAO' || 'SIM'
+                analise_capacity: "EFETUADO",                           // Opcional - >'EFETUADO' ?
+                api_name: "${artifactId}",                // Opcional - Nome da API >(Nome do Repositório)
+                dc: "${dataCenter}",                                         // Opcional - >'*' || ["lapa", "campinas", "saas"] || 'lapa' || 'lapa,campinas'
+                productOwner: [                                         // Obrigatório:            
+                    emails:"${emailPO}",   //      email do PO 
+                    claroAccounts: "${loginPO}"                           //      conta Para Aprovação           
+                ],                                                      //      Ex: productOwner: [claroAccounts: "z12345678", emails: "po@email.com" ]
+                test: [                                                 // Obrigatório:
+                    emails:"${emailTest}",   //      email do Tester Adicionar sempre após com virgula o email do lider de test
+                    claroAccounts: "${loginTest}"                           //      conta Para Aprovação
+                ],                                                      //      Ex: test: [claroAccounts: "z12345678", emails: "tester@email.com" ]
+                devEmail: [                                             // Opcional
+                    "${emailDev}"           //      > email do Commit no Git ou email do PO
+                                                                        //      Ex: devEmail: ["dev1@email.com", "dev2@email.com"] 
+                ],                                                      //      Ex: devEmail: 'dev@email.com'
+                squad: "SQUAD",                                         // Opcional - Nome da Squad
+                stripBackendConfig: true                                // Opcional - true or >false
+            )            
+        }
+        catch (err) {
+            print err
+            currentBuild.result = 'FAILURE'
+            throw err
+        }
+    }
+}

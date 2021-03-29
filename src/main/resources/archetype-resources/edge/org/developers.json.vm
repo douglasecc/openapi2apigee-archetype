@@ -1,9 +1,64 @@
-[
-  {
-    "attributes": [],
-    "email": "${artifactId}-cicd${deployment.suffix}@integration.testing.com",
-    "firstName": "CICD",
-    "lastName": "NA",
-    "userName": "cicd"
-  }
-]
+{
+  "${emailDev}": [
+    {
+      "name": "${artifactId}-app",
+      "displayName": "${artifactId}-app",
+      "apiProducts": [
+        "${artifactId}-product"
+      ],
+      "callbackUrl": "",
+      "scopes": [
+      ],
+      "attributes": [
+        {
+          "name": "apptype",
+          "value": "confidential"
+        },
+        {
+          "name": "allowedips",
+          "value": "0.0.0.0/1"
+        }
+      ]
+    },
+    {
+      "name": "${artifactId}-app-nq",
+      "displayName": "${artifactId}-app-nq",
+      "apiProducts": [
+        "${artifactId}-product-nq"
+      ],
+      "callbackUrl": "",
+      "scopes": [
+      ],
+      "attributes": [
+        {
+          "name": "apptype",
+          "value": "confidential"
+        },
+        {
+          "name": "allowedips",
+          "value": "0.0.0.0/1"
+        }
+      ]
+    },
+    {
+      "name": "${artifactId}-app-np",
+      "displayName": "${artifactId}-app-np",
+      "apiProducts": [
+        "${artifactId}-product-np"
+      ],
+      "callbackUrl": "",
+      "scopes": [
+      ],
+      "attributes": [
+        {
+          "name": "apptype",
+          "value": "confidential"
+        },
+        {
+          "name": "allowedips",
+          "value": "0.0.0.0/1"
+        }
+      ]
+    }
+  ]
+}

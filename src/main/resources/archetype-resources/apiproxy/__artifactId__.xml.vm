@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<APIProxy revision="2" name="${artifactId}${deployment.suffix}">
+<APIProxy revision="2" name="${artifactId}">
     <ConfigurationVersion majorVersion="4" minorVersion="0"/>
-    <DisplayName>${artifactId}${deployment.suffix}</DisplayName>
+    <DisplayName>${artifactId}</DisplayName>
     #if (${description})
         <Description>${description}</Description>
     #else
-        <Description>${artifactId}${deployment.suffix}</Description>
+        <Description>API description - ${artifactId}</Description>
     #end
-    <Basepaths>${basepath}${deployment.suffix}</Basepaths>
+    <Basepaths>${basepath}</Basepaths>
     <Policies>
-        #if($enable-cors == "true")
-            <Policy>$cors-policy-name</Policy>
-        #end
+        <Policy>AM-SetAcceptHeader</Policy>
+        <Policy>FC-BackendConfiguration</Policy>
+        <Policy>JS-InitValidations</Policy>
+        <Policy>RF-BusinessFault</Policy>
+        <Policy>RF-MethodNotAllowed</Policy>
+        <Policy>RF-NotAcceptable</Policy>
+        <Policy>RF-PathNotFound</Policy>
+        <Policy>RF-UnsupportedMediaType.xml</Policy>
     </Policies>
     <ProxyEndpoints>
         <ProxyEndpoint>default</ProxyEndpoint>
     </ProxyEndpoints>
+    <Resources>
+        <Resource>jsc://JS-InitValidations.js</Resource>
+    </Resources>
+    <Spec/>
+    <TargetServers/>
     <TargetEndpoints>
         <TargetEndpoint>default</TargetEndpoint>
     </TargetEndpoints>
-    <Spec></Spec>
-    <TargetServers/>
 </APIProxy>

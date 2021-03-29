@@ -1,24 +1,94 @@
 [
   {
-    "name": "${artifactId}-product-cicd${deployment.suffix}",
-    "displayName": "${artifactId}-product-cicd${deployment.suffix}",
-    "description": "Product to test CICD on ${artifactId}${deployment.suffix} API Proxy",
+    "name": "${artifactId}-product",
+    "displayName": "${artifactId}-product",
+    "description": "Product to test CICD on ${artifactId} API Proxy",
     "apiResources": [
-      "/**",
-      "/"
     ],
     "approvalType": "auto",
     "attributes": [
+        {
+            "name": "access",
+            "value": "internal"
+        },
+        {
+            "name": "auth.apptype",
+            "value": "confidential"
+        },
+        {
+            "name": "auth.usertype",
+            "value": "false"
+        }
     ],
     "environments": [
-      "${apigee.env}"
+      "${envs}"
     ],
     "proxies": [
-      "${artifactId}${deployment.suffix}"
+      "oauth-tokenissuer-v1",
+      "${artifactId}"
     ],
-    "quota": "10000",
+    "scopes": []
+  },
+  {
+    "name": "${artifactId}-product-nq",
+    "displayName": "${artifactId}-product-nq",
+    "description": "Product to test CICD on ${artifactId} API Proxy With Qouta",
+    "apiResources": [
+    ],
+    "approvalType": "auto",
+    "attributes": [
+        {
+            "name": "access",
+            "value": "internal"
+        },
+        {
+            "name": "auth.apptype",
+            "value": "confidential"
+        },
+        {
+            "name": "auth.usertype",
+            "value": "false"
+        }
+    ],
+    "environments": [
+      "${envs}"
+    ],
+    "proxies": [
+      "oauth-tokenissuer-v1",
+      "${artifactId}"
+    ],
+    "quota": "2",
     "quotaInterval": "1",
-    "quotaTimeUnit": "month",
+    "quotaTimeUnit": "minute",
+    "scopes": []
+  },
+  {
+    "name": "${artifactId}-product-np",
+    "displayName": "${artifactId}-product-np",
+    "description": "Product to test CICD on ${artifactId} API Proxy With No Permission (403)",
+    "apiResources": [
+    ],
+    "approvalType": "auto",
+    "attributes": [
+        {
+            "name": "access",
+            "value": "internal"
+        },
+        {
+            "name": "auth.apptype",
+            "value": "confidential"
+        },
+        {
+            "name": "auth.usertype",
+            "value": "false"
+        }
+    ],
+    "environments": [
+      "${envs}"
+    ],
+    "proxies": [
+      "oauth-tokenissuer-v1"
+    ],
     "scopes": []
   }
 ]

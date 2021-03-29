@@ -1,0 +1,82 @@
+var thisAPI = {
+    "name":"${artifactId}-mock",
+    "method":[#foreach($flow in $flows)"${flow.verb}",#end "OPTIONS"],
+    "accept":"application/json",
+    "required": []
+};
+
+var mock = context.getVariable("request.header.x-mock");
+
+var rspStatus = '200';
+var rspContentType = "application/json";
+var rspBody = '{"success":"ok"}';
+
+var basePath = context.getVariable("proxy.basepath");
+
+var authorization   = context.getVariable("request.header.authorization");
+var uri             = context.getVariable("request.uri");
+var verb            = context.getVariable("request.verb");
+var contentType     = context.getVariable("request.header.content-type");
+var contentBody     = context.getVariable("request.content");
+var accept          = context.getVariable("request.header.accept");
+
+if(basePath.toString().indexOf(uri) > -1){
+    mock = '404';
+}else if(thisAPI.method.indexOf(verb) < 0){
+    mock = '405';
+}else if(!contentBody && verb != "GET" && verb != "TRACE"){
+    mock = '400';
+}else if(contentBody){
+    if(contentType != thisAPI.accept){
+        mock = '415';
+    } else {
+        try {
+            var json = JSON.parse(contentBody);
+            var countRequired = 0;
+
+            thisAPI.required.forEach(function(field){
+                if(!json[field]){
+                countRequired++;
+                }
+            });
+
+            if(countRequired > 0){
+                mock = '400';
+            }
+        } catch (error) {
+            mock = '400';
+        }
+    }
+}else if(!accept){
+    mock = '406';
+}
+
+if(mock){
+    switch(mock){
+        case '400':
+        case '401':
+        case '403':
+        case '404':
+        case '405':
+        case '406':
+        case '408':
+        case '409':
+        case '410':
+        case '415':
+        case '422':
+        case '429':
+        case '451':
+        case '500':
+        case '503':
+            rspBody = '{"message":"Message Fault","errorCode":"ERR_CODE"}';
+            rspStatus = mock;
+            break;
+        default:
+            rspStatus = '200';
+    }
+}
+
+context.setVariable("message.content", JSON.parse(JSON.stringify(rspBody)));
+context.setVariable("response.header.X-BackStatus", rspStatus);
+context.setVariable("response.header.content-type", rspContentType);
+context.setVariable("message.status.code", rspStatus);

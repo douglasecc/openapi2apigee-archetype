@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
+<RaiseFault async="false" continueOnError="false" enabled="true" name="RF-BusinessFault"> 
+    <DisplayName>RF-BusinessFault</DisplayName> 
+    <Properties/> 
+    <FaultResponse> 
+        <AssignVariable> 
+            <Name>customfault.name</Name> 
+            <Value>BusinessFault</Value> 
+        </AssignVariable> 
+        <Set> 
+            <Payload contentType="application/json"> 
+{ 
+    "apiVersion": "{apiVersion}", 
+    "transactionId": "{transactionId}", 
+    "error": { 
+        "httpCode": "422", 
+        "errorCode": "API-${errorCode}-422", 
+        "message": "Business Fault", 
+        "detailedMessage": "Business fault occurred", 
+        "link": { 
+            "rel": "related", 
+            "href": "https://api.net.com.br/docs/error_codes.html" 
+        } 
+    } 
+} 
+            </Payload> 
+            <StatusCode>422</StatusCode> 
+            <ReasonPhrase>Business Fault</ReasonPhrase> 
+        </Set> 
+    </FaultResponse> 
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables> 
+</RaiseFault> 

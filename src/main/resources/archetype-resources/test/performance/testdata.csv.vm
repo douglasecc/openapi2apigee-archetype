@@ -1,4 +1,0 @@
-test_case_id,user_story,test_case_description,env,scheme,servername,port,method,path,execute,assert_header
-#foreach($flow in $flows)
-${flow.name},${flow.name},${flow.desc},${apigee.env},${northbound.scheme},${northbound.domain},${northbound.port},${flow.verb},${basepath}${deployment.suffix}${flow.path.replaceAll("\{.*?\}","1")},Y,HTTP/1.1 200 OK
-#end

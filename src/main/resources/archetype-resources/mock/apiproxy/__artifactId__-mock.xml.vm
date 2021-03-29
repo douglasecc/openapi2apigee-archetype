@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy revision="1" name="${artifactId}-mock">
+    <BasePaths>/mock${basepath}</BasePaths>
+    <ConfigurationVersion majorVersion="4" minorVersion="0"/>
+    <DisplayName>${artifactId}-mock</DisplayName>
+    <Description>API description - Mock backend for ${artifactId}</Description>
+    <Policies>
+        <Policy>JS-MockResponse</Policy>
+    </Policies>
+    <ProxyEndpoints>
+        <ProxyEndpoint>default</ProxyEndpoint>
+    </ProxyEndpoints>
+    <Resources>
+        <Resource>jsc://JS-MockResponse.js</Resource>
+    </Resources>
+    <Spec/>
+    <TargetServers/>
+    <TargetEndpoints/>
+</APIProxy>

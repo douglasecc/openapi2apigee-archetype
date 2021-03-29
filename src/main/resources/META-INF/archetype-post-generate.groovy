@@ -18,6 +18,8 @@ import com.sun.org.apache.xml.internal.serialize.XMLSerializer
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
+import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.parser.ObjectMapperFactory
 import io.swagger.v3.parser.OpenAPIV3Parser
 import io.swagger.v3.parser.core.models.AuthorizationValue
@@ -53,7 +55,6 @@ import com.google.gson.JsonParser
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest
 
-
 class OpenAPIV3ParserData extends OpenAPIV3Parser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class)
@@ -61,6 +62,7 @@ class OpenAPIV3ParserData extends OpenAPIV3Parser {
     private static ObjectMapper YAML_MAPPER = ObjectMapperFactory.createYaml()
     private static String encoding = "UTF-8"
     private String data
+
     private ObjectMapper getRightMapper(String data) {
         ObjectMapper mapper
         if (data.trim().startsWith("{")) {
@@ -68,7 +70,6 @@ class OpenAPIV3ParserData extends OpenAPIV3Parser {
         } else {
             mapper = YAML_MAPPER
         }
-
         return mapper
     }
 
@@ -78,6 +79,7 @@ class OpenAPIV3ParserData extends OpenAPIV3Parser {
             location = location.replaceAll("\\\\", "/")
             if (location.toLowerCase().startsWith("http")) {
                 data = RemoteUrl.urlToString(location, auths)
+
             } else {
                 String fileScheme = "file:"
                 Path path
@@ -98,10 +100,12 @@ class OpenAPIV3ParserData extends OpenAPIV3Parser {
             JsonNode rootNode = mapper.readTree(data)
             LOGGER.debug("Parsed rootNode: {}", rootNode)
             return this.readWithInfo(location, rootNode)
+
         } catch (SSLHandshakeException var6) {
             output = new SwaggerParseResult()
             output.setMessages(Arrays.asList("unable to read location `" + location + "` due to a SSL configuration error.  It is possible that the server SSL certificate is invalid, self-signed, or has an untrusted Certificate Authority."))
             return output
+
         } catch (Exception var7) {
             LOGGER.warn("Exception while reading:", var7)
             output = new SwaggerParseResult()
@@ -109,6 +113,7 @@ class OpenAPIV3ParserData extends OpenAPIV3Parser {
             return output
         }
     }
+
     String getSpecData() {
         return data
     }
@@ -150,7 +155,6 @@ class APIProxyFlow {
     String path
     String verb
 
-
     @Override
     public String toString() {
         return "APIProxyFlow{" +
@@ -176,7 +180,6 @@ class FileWalker {
 
     void walk(File folder) {
         for (File file: folder.listFiles()) {
-//            System.out.println(file.path)
             if (file.isDirectory()) {
                 walk(file)
             } else {
@@ -218,11 +221,11 @@ class RootFilesMover implements FileExecutor {
     }
 }
 
-
 class XmlFormater implements FileExecutor {
 
     final DocumentBuilderFactory dbFactory
     final DocumentBuilder dBuilder
+
     XmlFormater() {
         dbFactory = DocumentBuilderFactory.newInstance()
         dBuilder = dbFactory.newDocumentBuilder()
@@ -270,15 +273,22 @@ class ProfileSetup {
         }
     }
 
-
     private Map<String, Map<String, String>> getFromParameters() {
         Map<String, Map<String, String>> setupMap = new HashMap<>()
-        for (String env : props.get("envs")) {
+        for (String env : props.get("envs").split(",")) {
             Map<String, String> envMap = new HashMap<>()
             envMap.put("org", props.getProperty("org"))
             envMap.put("env", env)
+            envMap.put("envs", props.get("envs").split(","))
             envMap.put("profile", env)
+            envMap.put("emailDev", props.getProperty("emailDev"))
+            envMap.put("emailPO", props.getProperty("emailPO"))
+            envMap.put("loginPO", props.getProperty("loginPO"))
+            envMap.put("emailTest", props.getProperty("emailTest"))
+            envMap.put("loginTest", props.getProperty("loginTest"))
             envMap.put("authtype", props.getProperty("authtype"))
+            envMap.put("tsAuthType", props.getProperty("tsAuthType"))
+            envMap.put("targetServer", props.getProperty("targetServers"))
             envMap.put("virtualhost", props.getProperty("virtualhost"))
             envMap.put("targeturl", props.getProperty("targeturl"))
             envMap.put("options", props.getProperty("options"))
@@ -296,12 +306,14 @@ class ProfileSetup {
             envMap.put("config-dir", props.getProperty("config-dir"))
             envMap.put("config-dir", props.getProperty("config-dir"))
             envMap.put("mockserver", props.getProperty("mockserver"))
+
             if ("true".equals(props.get("mockserver"))) {
                 String targetUrl = props.getProperty("proxyscheme") + "://" + props.getProperty("proxydomain") + ":" +  props.getProperty("proxyport") + '/mock' +  props.getProperty("basepath")
                 envMap.put("targeturl", targetUrl)
             } else {
                 envMap.put("targeturl", props.getProperty("targeturl"))
             }
+
             setupMap.put(env, envMap)
         }
         return setupMap
@@ -381,7 +393,7 @@ class ProfileSetup {
 
     Map<String, Map<String, String>> getSetup() {
         Map<String, Map<String, String>> setup;
-        if (StringUtils.isNotBlank(props.getProperty("edgeSetupFile"))) {
+        if (StringUtils.isNotBlank(props.getProperty("edgeSetupFile")) && !"\${empty.edgeSetupFile}".equalsIgnoreCase(props.getProperty("edgeSetupFile"))){
             setup = getFromSetupFile()
         } else {
             setup = getFromParameters()
@@ -440,7 +452,6 @@ class Mocker {
     }
 }
 
-
 final ArchetypeGenerationRequest req = request
 final OpenAPI openAPI
 final String data
@@ -483,12 +494,28 @@ if (specLocation.matches("^https?://.*") && StringUtils.isNotBlank(specAuthType)
     data = ( (OpenAPIV3ParserData) parser ).getSpecData()
 }
 
+//Obtem a versão da API no Swagger
+String version = openAPI.getInfo().getVersion()
+if(StringUtils.isNotBlank(version)){
+    properties.put("apiversion", version)
+}
+
+//Obter o email pelo Swagger
+Contact contact = openAPI.getInfo().getContact()
+if (contact != null){
+    String email = contact.getEmail()
+    if (StringUtils.isNotBlank(email)){
+        properties.put("emailDev", email)
+    }
+}
+
+//Obtem a lista de Paths e metodos
 List<APIProxyFlow> flows = new ArrayList<>()
 for (String path: openAPI.getPaths().keySet()) {
     for (PathItem.HttpMethod verb: openAPI.getPaths().get(path).readOperationsMap().keySet()) {
         Operation operation = openAPI.getPaths().get(path).readOperationsMap().get(verb)
         APIProxyFlow flow = new APIProxyFlow()
-        flow.setName(operation.getOperationId())
+        flow.setName(operation.getOperationId()!=null?operation.getOperationId():"")
         flow.setDesc(operation.getSummary())
         flow.setPath(path)
         flow.setVerb(verb.toString())
@@ -499,22 +526,53 @@ properties.put("flows", flows)
 
 File outputDirectory = new File(req.outputDirectory)
 File projectDir = new File(outputDirectory, req.artifactId)
-File docDir = new File(projectDir, "doc")
+File docDir = new File(projectDir, "specs")
 docDir.mkdirs()
+
 File specFile = new File(docDir, new File(specUrl.getFile()).getName())
 properties.put("specFileName", specFile.getName())
 FileWriter fw = new FileWriter(specFile)
 fw.write(data)
 fw.close()
-if (StringUtils.isNotBlank(properties.getProperty("templateDir"))) {
+if (StringUtils.isNotBlank(properties.getProperty("templateDir")) && !"\${empty.templateDir}".equalsIgnoreCase(properties.getProperty("templateDir"))) {
     FileUtils.copyDirectory(new File(properties.getProperty("templateDir")), projectDir)
+}
+
+//Tratamento para os arquivos de testes
+List<String> verbos = new ArrayList<>()
+for(APIProxyFlow flow : flows){
+    verbos.add(flow.getVerb())
+}
+
+//Remove os arquivos não necessários de testes unitários
+File dirUnitTests = new File(projectDir, "tests/unit/features")
+File[] files = dirUnitTests.listFiles();
+for (File file : files) {
+    if (!file.isDirectory()){
+        String fverb = file.getName().split("[.]")[0].split("_")[1]
+        if(!verbos.contains(fverb)){
+            file.delete()
+        }
+    }
+}
+
+//Remove os arquivos não necessários de testes integrados
+File dirIntTests = new File(projectDir, "tests/integration/features")
+File[] filesInt = dirIntTests.listFiles();
+for (File file : filesInt) {
+    if (!file.isDirectory()){
+        String fverb = file.getName().split("[.]")[0].split("_")[1]
+        if(!verbos.contains(fverb)){
+            file.delete()
+        }
+    }
 }
 
 System.out.println("---------------DEBUG---------------")
 profileSetup.dumpMap(properties, 0)
 System.out.println("---------------DEBUG---------------")
 
-FileUtils.copyFile(specFile, new File(projectDir, "mock/apiproxy/resources/hosted/api/"+specFile.name))
+//FileUtils.copyFile(specFile, new File(projectDir, "mock/apiproxy/resources/hosted/api/"+specFile.name))
 File profileFile = new File(projectDir, "config/profile-env.yaml.vm")
 File _envDir = new File(projectDir, "edge/_env")
 
@@ -550,7 +608,7 @@ for (String profile: profiles.keySet()) {
 if (buildMock) {
     new Mocker().genMock(projectDir, specFile)
 } else {
-    FileUtils.forceDelete(new File(projectDir, "mock"))
+    //FileUtils.forceDelete(new File(projectDir, "mock"))
 }
 new File(projectDir, "root").delete()
 if (!"true".equals(req.getProperties().get("enable-cors"))) {
@@ -558,8 +616,7 @@ if (!"true".equals(req.getProperties().get("enable-cors"))) {
 }
 new FileWalker(new XmlFormater()).walk(projectDir)
 
-
-
-
-
-
+File filePom = new File(projectDir, "pom.xml.vm")
+filePom.delete()
+filePom = new File(projectDir, "pom.xml")
+filePom.delete()

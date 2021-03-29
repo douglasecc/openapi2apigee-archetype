@@ -1,0 +1,10 @@
+/tests/node_modules/
+/tests/reports/features/
+/.scannerwork/
+/tests/reports
+tests/package-lock.json
+mock/*.zip
+*.zip
+*.bat
+*.cmd
+reports/unit-report.json

@@ -1,0 +1,80 @@
+try {
+    var thisAPI = {
+        "name":"${artifactId}",
+        "method":[#foreach($flow in $flows)"${flow.verb}",#end "OPTIONS"],
+        "accept":"application/json",
+        "validate": false,
+        "headers":{
+            "required":[]
+        },
+        "body":{
+            "required":[]
+        }
+    };
+
+    var lError      = false;
+    var vStatusCode = "200";
+    var vErrorMsg   = "";
+    var vErrorDtl   = "";
+
+    var verb        = context.getVariable("request.verb");
+
+    if(verb != "OPTIONS"){
+
+        var basePath    = context.getVariable("proxy.basepath");
+
+        var uri         = context.getVariable("request.uri");
+        var contentType = context.getVariable("request.header.content-type");
+        var contentBody = context.getVariable("request.content");
+        var headers     = context.getVariable("request.headers.names");
+        var sHeaders    = String(headers);
+        var lHeaders    = sHeaders.slice(1, -1).split(", ");
+
+        if(thisAPI.method.indexOf(verb) < 0){
+            vStatusCode = "405";
+            lError      = true;
+
+        }else if(!contentBody && verb != "GET" && verb != "TRACE"){
+            vStatusCode = "400";
+            lError      = true;
+
+        }else if(contentBody){
+            if(thisAPI.validate){
+                try {
+                    var json = JSON.parse(contentBody);
+                    var countRequired = 0;
+
+                    thisAPI.headers.required.forEach(function(value){
+                        if( lHeaders.indexOf(value.toLowerCase()) < 0 ){
+                            countRequired++;
+                        }
+                    });
+
+                    thisAPI.body.required.forEach(function(field){
+                        if(!json[field]){
+                            countRequired++;
+                        }
+                    });
+
+                    if(countRequired > 0){
+                        vStatusCode = "400";
+                        lError      = true;
+                    }
+                } catch (error) {
+                    print("JS-InitValidations.js: "+error);
+                    vStatusCode = "400";
+                    lError      = true;
+                }
+            }
+        }
+    }
+
+    print("JS-InitValidations.js: hasError["+lError+"] status["+vStatusCode+"]");
+    context.setVariable("init.validation.error", lError);
+    context.setVariable("init.validation.status.code", vStatusCode);
+
+} catch (err) {
+    print("JS-InitValidations.js: "+err);
+    context.setVariable("init.validation.error", true);
+    context.setVariable("init.validation.status.code", "500");
+}

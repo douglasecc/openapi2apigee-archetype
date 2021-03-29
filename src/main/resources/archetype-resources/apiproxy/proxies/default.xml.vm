@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ProxyEndpoint name="default">
     <Description/>
-    <FaultRules/>
+    <FaultRules>
+        <FaultRule name="methodNotAllowedFault">
+            <Condition>(#foreach($flow in $flows) (initial.verb != "${flow.verb}") AND #end (initial.verb != "OPTIONS"))</Condition>
+            <Step>
+                <Name>RF-MethodNotAllowed</Name>
+            </Step>
+        </FaultRule>
+    </FaultRules>
     <PreFlow name="PreFlow">
         <Request/>
         <Response/>
@@ -13,18 +20,46 @@
     <Flows>
     #foreach($flow in $flows)
         <Flow name="$flow.name">
-            <Description>${flow.desc}</Description>
+            <Description>${StandardCharsets.UTF_8.decode($flow.desc).toString()}</Description>
             <Condition>(proxy.pathsuffix MatchesPath "${flow.path.replaceAll("\{.*?\}", "*")}") and (request.verb = "${flow.verb}")</Condition>
-            <Request/>
+            <Request>
+                <Step>
+                    <Condition>request.header.Accept == null</Condition>
+                    <Name>AM-SetAcceptHeader</Name>
+                </Step>
+                <Step>
+                    <Condition>request.header.Accept.values.string !~~ "(.*\*/\*.*)|(text|application)/(xml.*|json.*|([a-z]*+json.*))"</Condition>
+                    <Name>RF-NotAcceptable-406</Name>
+                </Step>
+            </Request>
             <Response/>
         </Flow>
     #end
+        <Flow name="OPTIONS">
+            <Description>Flow para tratar a requisição OPTIONS referente a política de CORS dos browsers.</Description>
+            <Request/>
+            <Response/>
+            <Condition>initial.verb = "OPTIONS"</Condition>
+        </Flow>
+        <Flow name="UnknownResource">
+            <Description>Flow para tratar o erro http 404</Description>
+            <Request>
+                <Step>
+                    <Name>RF-PathNotFound</Name>
+                </Step>
+            </Request>
+            <Response/>
+        </Flow>
     </Flows>
     <HTTPProxyConnection>
-        <BasePath>${basepath}${deployment.suffix}</BasePath>
-        <VirtualHost>default</VirtualHost>
+        <BasePath>${basepath}</BasePath>
+        <VirtualHost>secure</VirtualHost>
     </HTTPProxyConnection>
     <RouteRule name="default">
+        <Condition>(#foreach($flow in $flows)(initial.verb = "${flow.verb}") AND #end (initial.verb != "OPTIONS"))</Condition>
         <TargetEndpoint>default</TargetEndpoint>
+    </RouteRule>
+    <RouteRule name="noRouteRule">
+        <Condition>(#foreach($flow in $flows)(initial.verb != "${flow.verb}") AND #end (initial.verb = "OPTIONS"))</Condition>
     </RouteRule>
 </ProxyEndpoint>

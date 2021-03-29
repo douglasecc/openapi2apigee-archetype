@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
+<RaiseFault async="false" continueOnError="false" enabled="true" name="RF-InternalServerError"> 
+    <DisplayName>RF-InternalServerError</DisplayName> 
+    <Properties/> 
+    <FaultResponse> 
+        <Set> 
+            <Headers/> 
+            <StatusCode>500</StatusCode> 
+            <ReasonPhrase>Server Error</ReasonPhrase> 
+        </Set> 
+    </FaultResponse> 
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables> 
+</RaiseFault> 

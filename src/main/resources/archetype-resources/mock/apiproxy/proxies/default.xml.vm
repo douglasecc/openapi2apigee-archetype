@@ -8,14 +8,16 @@
     </PreFlow>
     <PostFlow name="PostFlow">
         <Request/>
-        <Response/>
+        <Response>
+            <Step>
+                <Name>JS-MockResponse</Name>
+            </Step>
+        </Response>
     </PostFlow>
     <Flows/>
     <HTTPProxyConnection>
         <BasePath>/mock${basepath}</BasePath>
-        <VirtualHost>default</VirtualHost>
+        <VirtualHost>secure</VirtualHost>
     </HTTPProxyConnection>
-    <RouteRule name="default">
-        <TargetEndpoint>default</TargetEndpoint>
-    </RouteRule>
+    <RouteRule name="noroute"/>
 </ProxyEndpoint>

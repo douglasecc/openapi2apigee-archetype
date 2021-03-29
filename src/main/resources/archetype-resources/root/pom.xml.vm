@@ -6,7 +6,7 @@
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
     <version>1</version>
-    <name>${artifactId}${deployment.suffix}</name>
+    <name>${artifactId}</name>
     <packaging>pom</packaging>
 
     <pluginRepositories>
@@ -29,7 +29,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <deployment.suffix>-${user.name}</deployment.suffix>
-        <proxy.basename>${artifactId}${deployment.suffix}</proxy.basename>
+        <proxy.basename>${artifactId}</proxy.basename>
 
         <apigee.username>${env.APIGEE_USERNAME}</apigee.username>
         <apigee.password>${env.APIGEE_PASSWORD}</apigee.password>
@@ -296,12 +296,12 @@
                             <replacements>
                                 <replacement>
                                     <xpath>/ProxyEndpoint/HTTPProxyConnection/VirtualHost/text()</xpath>
-                                    <token>^(.*)$</token>
+                                    <token>^(.*)\$</token>
                                     <value>${northbound.virtualhost}</value>
                                 </replacement>
                                 <replacement>
                                     <xpath>/TargetEndpoint/HTTPTargetConnection/VirtualHost/text()</xpath>
-                                    <token>^(.*)$</token>
+                                    <token>^(.*)\$</token>
                                     <value>${targetEndpoint.url}</value>
                                 </replacement>
                             </replacements>
@@ -309,8 +309,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-
             <plugin>
                 <groupId>io.apigee.build-tools.enterprise4g</groupId>
                 <artifactId>apigee-edge-maven-plugin</artifactId>

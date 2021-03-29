@@ -1,0 +1,48 @@
+[
+    {
+      "entry": [
+        {
+          "name": "${artifactId}__apiVersion",
+          "value": "${apiversion}"
+        }
+      ],
+      "name": "sf-initializeattributes-v1-config"
+    },
+    {
+      "entry": [
+#foreach($flow in $flows)
+        {
+          "name": "${artifactId}__${flow.verb}",
+          "value": "100ps"
+        },
+#end
+        {
+          "name": "${artifactId}__OPTIONS",
+          "value": "100ps"
+        }
+      ],
+      "name": "sf-spikearrest-v1-config"
+    },
+    {
+      "entry": [
+        {
+          "name": "${artifactId}__origins",
+          "value": "*"
+        }
+      ],
+      "name": "sf-cors-v1-config"
+    },
+    {
+      "entry": [
+#foreach($flow in $flows)
+#if ($flow != "GET")
+        {
+          "name": "${artifactId}__${flow.verb}__payloadSizeMax",
+          "value": "10240"
+        }
+#end
+#end
+      ],
+      "name": "sf-threatprotection-v1-config"
+    }
+  ]

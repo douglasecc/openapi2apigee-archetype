@@ -26,8 +26,7 @@ under the License.
 
     <requiredProperties>
         <requiredProperty key="spec" />
-        <requiredProperty key="org"><defaultValue>${empty.property}</defaultValue></requiredProperty>
-        <requiredProperty key="envs"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="envs"><defaultValue>lab,dev,test</defaultValue></requiredProperty>
 
         <requiredProperty key="spec-auth-name"><defaultValue>${empty.property}</defaultValue></requiredProperty>
         <requiredProperty key="spec-auth-value"><defaultValue>${empty.property}</defaultValue></requiredProperty>
@@ -44,11 +43,22 @@ under the License.
         <requiredProperty key="clientsecret"><defaultValue>edgeclisecret</defaultValue></requiredProperty>
 
         <requiredProperty key="basepath" />
-        <requiredProperty key="virtualhost"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="emailDev"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="emailPO"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="loginPO"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="emailTest"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="loginTest"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="targetServer"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="tsAuthType"><defaultValue>basic</defaultValue></requiredProperty>
+        <requiredProperty key="dataCenter"><defaultValue>campinas</defaultValue></requiredProperty>
+        <requiredProperty key="successCodes"><defaultValue>1xx,2xx,3xx</defaultValue></requiredProperty>
+        <requiredProperty key="errorCode"><defaultValue>ERRORCODE</defaultValue></requiredProperty>
+
+        <requiredProperty key="virtualhost"><defaultValue>secure</defaultValue></requiredProperty>
         <requiredProperty key="proxydomain"><defaultValue>${empty.property}</defaultValue></requiredProperty>
         <requiredProperty key="proxyscheme"><defaultValue>https</defaultValue></requiredProperty>
         <requiredProperty key="proxyport"><defaultValue>443</defaultValue></requiredProperty>
-        <requiredProperty key="targeturl"><defaultValue>${empty.property}</defaultValue></requiredProperty>
+        <requiredProperty key="targeturl"><defaultValue>${basepath}</defaultValue></requiredProperty>
         <requiredProperty key="mockserver"><defaultValue>false</defaultValue></requiredProperty>
 
         <requiredProperty key="config-options"><defaultValue>update</defaultValue></requiredProperty>
@@ -58,14 +68,12 @@ under the License.
         <requiredProperty key="enable-cors"><defaultValue>false</defaultValue></requiredProperty>
         <requiredProperty key="cors-policy-name"><defaultValue>AM-AddCORS</defaultValue></requiredProperty>
 
-
-
         <requiredProperty key="apigee-deploy-plugin-version"><defaultValue>1.1.7</defaultValue></requiredProperty>
         <requiredProperty key="apigee-config-maven-plugin"><defaultValue>1.3.7</defaultValue></requiredProperty>
 
-        <requiredProperty key="edgeSetupFile"><defaultValue>${empty.property}</defaultValue></requiredProperty>
-        <requiredProperty key="templateDir"><defaultValue>${empty.property}</defaultValue></requiredProperty>
-    </requiredProperties>s
+        <requiredProperty key="edgeSetupFile"><defaultValue>${empty.edgeSetupFile}</defaultValue></requiredProperty>
+        <requiredProperty key="templateDir"><defaultValue>${empty.templateDir}</defaultValue></requiredProperty>
+    </requiredProperties>
 
     <fileSets>
         <fileSet filtered="false" packaged="false" encoding="UTF-8">
@@ -77,6 +85,13 @@ under the License.
 
         <fileSet filtered="false" packaged="false" encoding="UTF-8">
             <directory>apiproxy</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet filtered="false" packaged="false" encoding="UTF-8">
+            <directory>docs</directory>
             <includes>
                 <include>**/*</include>
             </includes>
@@ -95,18 +110,21 @@ under the License.
                 <include>**/*</include>
             </includes>
         </fileSet>
+
         <fileSet filtered="false" packaged="false" encoding="UTF-8">
             <directory>mock</directory>
             <includes>
                 <include>**/*</include>
             </includes>
         </fileSet>
+
         <fileSet filtered="false" packaged="false" encoding="UTF-8">
-            <directory>test</directory>
+            <directory>tests</directory>
             <includes>
                 <include>**/*</include>
             </includes>
         </fileSet>
+
         <fileSet filtered="false" packaged="false" encoding="UTF-8">
             <directory>edge</directory>
             <includes>

@@ -1,0 +1,26 @@
+{
+    "parameters": {
+        "domain": "lab.apigw.claro.com.br",
+        "protocol": "https",
+        "port": "443",
+        "basepath": "/",
+        "apps": {
+            "${artifactId}-app": {
+                "name": "${artifactId}-app",
+                "authHeaderName": "x-client-auth",
+                "authHeaderValue": "Basic SGpIekFNYXVBdm91Z3NLT29CeFhDNXp2NHh6T081OWg6SXg4a1dmUkJtVm93V3R6Vg=="
+            },
+            "${artifactId}-app-nq": {
+                "name": "${artifactId}-app-nq",
+                "authHeaderName": "x-client-auth",
+                "authHeaderValue": "Basic R1JlQXlTckRBVlRDNlVVa2lSQUNZaFg4NTd6QWxheFY6MEl5WHZaUHRHNXNxZkdBVw=="
+            },
+            "${artifactId}-app-np": {
+                "name": "${artifactId}-app-np",
+                "authHeaderName": "x-client-auth",
+                "authHeaderValue": "Basic TVB4WThjMTl1bXRPNkNkY0dmV0FMQUsxYTNUQk5hZzc6cm43RlFCM1AwaTNmZDc5UA=="
+            }
+        },
+        "unitTesting": "true"
+    }
+}
