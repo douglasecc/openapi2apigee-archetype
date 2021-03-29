@@ -40,7 +40,6 @@ Maven plugins in generated project
 | artifactId                   | yes      | name of your api proxy to generate, it will be your artifactId in your pom.xml |                                      |
 | version                      | yes      | version of your pom.xml                                                        |                                      |
 | spec                         | yes      | url or file location of the spec file                                          |                                      |
-| spec                         | yes      | url or file location of the spec file                                          |                                      |
 | org                          | yes      | Apigee EDGE org                                                                |                                      |
 | envs                         | yes      | comma separated names, e.g. test,prod                                          |                                      |
 | spec-auth-name               | no       | name of authorization to pass if spec is hosted e.g. _Aurhorization_           |                                      |
