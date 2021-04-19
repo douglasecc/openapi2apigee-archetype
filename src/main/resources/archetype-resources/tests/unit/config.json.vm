@@ -7,18 +7,33 @@
         "apps": {
             "${artifactId}-app": {
                 "name": "${artifactId}-app",
+#if($authtype == "apikey")
+                "authHeaderName": "x-client-key",
+                "authHeaderValue": "c2VjcmV0"
+#elseif($authtype == "basic")
                 "authHeaderName": "x-client-auth",
-                "authHeaderValue": "Basic SGpIekFNYXVBdm91Z3NLT29CeFhDNXp2NHh6T081OWg6SXg4a1dmUkJtVm93V3R6Vg=="
+                "authHeaderValue": "Basic dGVzdGU6dGVzdGU="
+#end
             },
             "${artifactId}-app-nq": {
                 "name": "${artifactId}-app-nq",
+#if($authtype == "apikey")
+                "authHeaderName": "x-client-key",
+                "authHeaderValue": "c2VjcmV0"
+#elseif($authtype == "basic")
                 "authHeaderName": "x-client-auth",
-                "authHeaderValue": "Basic R1JlQXlTckRBVlRDNlVVa2lSQUNZaFg4NTd6QWxheFY6MEl5WHZaUHRHNXNxZkdBVw=="
+                "authHeaderValue": "Basic dGVzdGU6dGVzdGU="
+#end
             },
             "${artifactId}-app-np": {
                 "name": "${artifactId}-app-np",
+#if($authtype == "apikey")
+                "authHeaderName": "x-client-key",
+                "authHeaderValue": "c2VjcmV0"
+#elseif($authtype == "basic")
                 "authHeaderName": "x-client-auth",
-                "authHeaderValue": "Basic TVB4WThjMTl1bXRPNkNkY0dmV0FMQUsxYTNUQk5hZzc6cm43RlFCM1AwaTNmZDc5UA=="
+                "authHeaderValue": "Basic dGVzdGU6dGVzdGU="
+#end
             }
         },
         "unitTesting": "true"

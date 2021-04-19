@@ -1,0 +1,67 @@
+#set($H = '#')
+#set($D = '$')
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+ xmlns:S="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v11="http://www.claro.com.br/EBO/Claro/v1" exclude-result-prefixes="xsl S">
+
+    <xsl:output method="xml" encoding="UTF-8" standalone="no" omit-xml-declaration="no" indent="yes"/>
+
+    <xsl:param name="apiVersion" />
+    <xsl:param name="transactionId"/>
+    <xsl:param name="isParametroInvalidoFault"/>
+    <xsl:param name="isTechnicalFault"/>
+
+    <xsl:variable name="soapErrorInfoMessage">
+        <xsl:value-of select="/S:Envelope/S:Body/S:Fault/detail/*/v11:mensagem"/>
+    </xsl:variable>
+    <xsl:variable name="soapErrorInfoInstruction">
+        <xsl:value-of select="/S:Envelope/S:Body/S:Fault/detail/*/v11:instrucao"/>
+    </xsl:variable>
+
+    <xsl:template match="/">
+        <xml>
+            <apiVersion>
+                <xsl:if test="string-length(${D}apiVersion)>0">
+                    <xsl:value-of select="${D}apiVersion"/>
+                </xsl:if>
+            </apiVersion>
+          <transactionId>
+              <xsl:if test="string-length(${D}transactionId)>0">
+                  <xsl:value-of select="${D}transactionId"/>
+              </xsl:if>
+          </transactionId>
+          <error>
+            <httpCode>
+                <xsl:choose>
+                    <xsl:when test="${D}isParametroInvalidoFault = 'true'">400</xsl:when>
+                    <xsl:when test="${D}isTechnicalFault = 'true'">500</xsl:when>
+                    <xsl:otherwise>503</xsl:otherwise>
+                </xsl:choose>
+            </httpCode>
+            <errorCode>
+                <xsl:choose>                                           
+                    <xsl:when test="${D}isParametroInvalidoFault = 'true'">API-${errorCode}-400</xsl:when>
+                    <xsl:when test="${D}isTechnicalFault = 'true'">API-${errorCode}-500</xsl:when>
+                    <xsl:otherwise>API-${errorCode}-503</xsl:otherwise>
+                </xsl:choose>            
+            </errorCode>
+            <message>
+                <xsl:choose>
+                    <xsl:when test="${D}isParametroInvalidoFault = 'true'">Bad Request</xsl:when>
+                    <xsl:when test="${D}isTechnicalFault = 'true'">Internal Server Error</xsl:when>
+                    <xsl:otherwise>Service Unavailable</xsl:otherwise>
+                </xsl:choose>
+            </message>
+            <detailedMessage>
+                <xsl:if test="string-length(${D}soapErrorInfoMessage)>0"><xsl:value-of select="${D}soapErrorInfoMessage"/></xsl:if>
+                <xsl:if test="string-length(${D}soapErrorInfoInstruction)>0"> - <xsl:value-of select="${D}soapErrorInfoInstruction"/></xsl:if>
+            </detailedMessage>
+                <link>
+                    <rel>related</rel>
+                    <href>https://api.claro.com.br/docs</href>
+                </link>
+          </error>
+      </xml>
+    </xsl:template>
+    
+</xsl:stylesheet>

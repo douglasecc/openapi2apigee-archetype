@@ -1,94 +1,134 @@
+#set ( $Q = '"')
 [
-  {
-    "name": "${artifactId}-product",
-    "displayName": "${artifactId}-product",
-    "description": "Product to test CICD on ${artifactId} API Proxy",
-    "apiResources": [
-    ],
-    "approvalType": "auto",
-    "attributes": [
-        {
-            "name": "access",
-            "value": "internal"
-        },
-        {
-            "name": "auth.apptype",
-            "value": "confidential"
-        },
-        {
-            "name": "auth.usertype",
-            "value": "false"
-        }
-    ],
-    "environments": [
-      "${envs}"
-    ],
-    "proxies": [
-      "oauth-tokenissuer-v1",
-      "${artifactId}"
-    ],
-    "scopes": []
-  },
-  {
-    "name": "${artifactId}-product-nq",
-    "displayName": "${artifactId}-product-nq",
-    "description": "Product to test CICD on ${artifactId} API Proxy With Qouta",
-    "apiResources": [
-    ],
-    "approvalType": "auto",
-    "attributes": [
-        {
-            "name": "access",
-            "value": "internal"
-        },
-        {
-            "name": "auth.apptype",
-            "value": "confidential"
-        },
-        {
-            "name": "auth.usertype",
-            "value": "false"
-        }
-    ],
-    "environments": [
-      "${envs}"
-    ],
-    "proxies": [
-      "oauth-tokenissuer-v1",
-      "${artifactId}"
-    ],
-    "quota": "2",
-    "quotaInterval": "1",
-    "quotaTimeUnit": "minute",
-    "scopes": []
-  },
-  {
-    "name": "${artifactId}-product-np",
-    "displayName": "${artifactId}-product-np",
-    "description": "Product to test CICD on ${artifactId} API Proxy With No Permission (403)",
-    "apiResources": [
-    ],
-    "approvalType": "auto",
-    "attributes": [
-        {
-            "name": "access",
-            "value": "internal"
-        },
-        {
-            "name": "auth.apptype",
-            "value": "confidential"
-        },
-        {
-            "name": "auth.usertype",
-            "value": "false"
-        }
-    ],
-    "environments": [
-      "${envs}"
-    ],
-    "proxies": [
-      "oauth-tokenissuer-v1"
-    ],
-    "scopes": []
-  }
+    {
+        "name": "${artifactId}-product",
+        "displayName": "${artifactId}-product",
+        "description": "Product to test CICD on ${artifactId} API Proxy",
+        "apiResources": [],
+        "approvalType": "auto",
+        "attributes": [
+            {
+                "name": "authtype",
+#if($authtype == "apikey")
+                "value": "[key]"
+#elseif($authtype == "basic")
+                "value": "[basic,allowedips]"
+#elseif($authtype == "oauth2")
+                "value": "[oauth]"
+#end
+            },
+            {
+                "name": "access",
+                "value": "private"
+            },
+            {
+                "name": "auth.apptype",
+#if($authtype == "apikey")
+                "value": "public"
+#else
+                "value": "confidential"
+#end
+            },
+            {
+                "name": "auth.usertype",
+                "value": "false"
+            }
+        ],
+        "environments": [
+            "${stringUtl.join($envs.split(","), "${Q},${Q}")}"
+        ],
+        "proxies": [
+            "oauth-tokenissuer-v1",
+            "${artifactId}"
+        ],
+        "scopes": []
+    },
+    {
+        "name": "${artifactId}-product-nq",
+        "displayName": "${artifactId}-product-nq",
+        "description": "Product to test CICD on ${artifactId} API Proxy With Qouta",
+        "apiResources": [],
+        "approvalType": "auto",
+        "attributes": [
+            {
+                "name": "authtype",
+#if($authtype == "apikey")
+                "value": "[key]"
+#elseif($authtype == "basic")
+                "value": "[basic,allowedips]"
+#elseif($authtype == "oauth2")
+                "value": "[oauth]"
+#end
+            },
+            {
+                "name": "access",
+                "value": "private"
+            },
+            {
+                "name": "auth.apptype",
+#if($authtype == "apikey")
+                "value": "public"
+#else
+                "value": "confidential"
+#end
+            },
+            {
+                "name": "auth.usertype",
+                "value": "false"
+            }
+        ],
+        "environments": [
+            "${stringUtl.join($envs.split(","), "${Q},${Q}")}"
+        ],
+        "proxies": [
+            "oauth-tokenissuer-v1",
+            "${artifactId}"
+        ],
+        "quota": "2",
+        "quotaInterval": "1",
+        "quotaTimeUnit": "minute",
+        "scopes": []
+    },
+    {
+        "name": "${artifactId}-product-np",
+        "displayName": "${artifactId}-product-np",
+        "description": "Product to test CICD on ${artifactId} API Proxy With No Permission (403)",
+        "apiResources": [],
+        "approvalType": "auto",
+        "attributes": [
+            {
+                "name": "authtype",
+#if($authtype == "apikey")
+                "value": "[key]"
+#elseif($authtype == "basic")
+                "value": "[basic,allowedips]"
+#elseif($authtype == "oauth2")
+                "value": "[oauth]"
+#end
+            },
+            {
+                "name": "access",
+                "value": "private"
+            },
+            {
+                "name": "auth.apptype",
+#if($authtype == "apikey")
+                "value": "public"
+#else
+                "value": "confidential"
+#end
+            },
+            {
+                "name": "auth.usertype",
+                "value": "false"
+            }
+        ],
+        "environments": [
+            "${stringUtl.join($envs.split(","), "${Q},${Q}")}"
+        ],
+        "proxies": [
+            "oauth-tokenissuer-v1"
+        ],
+        "scopes": []
+    }
 ]

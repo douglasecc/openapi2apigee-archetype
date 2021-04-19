@@ -3,6 +3,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 @Grapes([
         @Grab(group='org.openapitools', module='openapi-generator', version='4.2.1'),
         @Grab(group='org.apache.velocity', module='velocity', version='1.7'),
+        @Grab(group='org.apache.velocity', module='velocity-tools', version='2.0'),
         @Grab(group='org.apache.commons', module='commons-lang3', version='3.4'),
         @Grab(group='com.google.code.gson', module='gson', version='2.8.6'),
         @Grab(group='org.yaml', module='snakeyaml', version='1.25')
@@ -20,12 +21,17 @@ import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.Contact
+import io.swagger.v3.oas.models.parameters.Parameter
+import io.swagger.v3.oas.models.parameters.RequestBody
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.parser.ObjectMapperFactory
 import io.swagger.v3.parser.OpenAPIV3Parser
 import io.swagger.v3.parser.core.models.AuthorizationValue
 import io.swagger.v3.parser.core.models.SwaggerParseResult
 import io.swagger.v3.parser.util.ClasspathHelper
 import io.swagger.v3.parser.util.RemoteUrl
+
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
@@ -48,6 +54,9 @@ import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.lang.reflect.Field
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
@@ -134,6 +143,8 @@ class TemplateReplacer {
         context.put("file.resource.loader.path", basepath)
         context.put("file.resource.loader.cache", false)
         context.put("velocimacro.library.autoreload", true)
+        context.put("stringUtl", new StringUtils());
+        context.put("date", new Date());
         for (String key: templateVariables.keySet()) {
             context.put(key, templateVariables.get(key))
         }
@@ -141,8 +152,10 @@ class TemplateReplacer {
 
     void merge(File file) {
         String resource = file.path.substring(basepath.length() + 1)
-        Template template = velocityEngine.getTemplate(resource)
-        FileWriter fileWriter = new FileWriter(file)
+        Template template = velocityEngine.getTemplate(resource, "UTF-8")
+        template.setEncoding("UTF-8")
+        //FileWriter fileWriter = new FileWriter(file)
+        OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
         template.merge(context, fileWriter)
         fileWriter.close()
     }
@@ -236,13 +249,15 @@ class XmlFormater implements FileExecutor {
         if (file.name.endsWith(".xml")) {
             Document doc = dBuilder.parse(file)
             OutputFormat format = new OutputFormat(doc)
+            format.setEncoding("UTF-8");
             format.setIndenting(true)
             format.setLineWidth(255)
             format.setIndent(4)
             Writer out = new StringWriter()
             XMLSerializer serializer = new XMLSerializer(out, format)
             serializer.serialize(doc)
-            FileWriter fileWriter = new FileWriter(file)
+            //FileWriter fileWriter = new FileWriter(file)
+            OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
             fileWriter.write(out.toString().replaceAll("&quot;", "\""))
             fileWriter.close()
         }
@@ -281,16 +296,22 @@ class ProfileSetup {
             envMap.put("env", env)
             envMap.put("envs", props.get("envs").split(","))
             envMap.put("profile", env)
-            envMap.put("emailDev", props.getProperty("emailDev"))
-            envMap.put("emailPO", props.getProperty("emailPO"))
-            envMap.put("loginPO", props.getProperty("loginPO"))
-            envMap.put("emailTest", props.getProperty("emailTest"))
-            envMap.put("loginTest", props.getProperty("loginTest"))
+            envMap.put("basePath", props.getProperty("basePath"))
             envMap.put("authtype", props.getProperty("authtype"))
+
             envMap.put("tsAuthType", props.getProperty("tsAuthType"))
-            envMap.put("targetServer", props.getProperty("targetServers"))
+            envMap.put("targetServer", props.getProperty("targetServer"))
+            envMap.put("targeturl", StringUtils.defaultIfBlank(props.getProperty("targeturl"),props.getProperty("basePath")))
+            envMap.put("tsContentType", props.getProperty("tsContentType"))
+
+            envMap.put("emailDev", props.getProperty("emailDev"))
+            envMap.put("loginDev", props.getProperty("loginDev"))
+            envMap.put("emailPO", StringUtils.defaultIfBlank(props.getProperty("emailPO"),envMap.get("emailDev")))
+            envMap.put("loginPO", StringUtils.defaultIfBlank(props.getProperty("loginPO"),props.getProperty("loginDev")))
+            envMap.put("emailTest", StringUtils.defaultIfBlank(props.getProperty("emailTest"),props.getProperty("emailDev")))
+            envMap.put("loginTest", StringUtils.defaultIfBlank(props.getProperty("loginTest"),props.getProperty("loginDev")))
+            
             envMap.put("virtualhost", props.getProperty("virtualhost"))
-            envMap.put("targeturl", props.getProperty("targeturl"))
             envMap.put("options", props.getProperty("options"))
             envMap.put("delay", props.getProperty("delay"))
             envMap.put("tokenurl", props.getProperty("tokenurl"))
@@ -452,6 +473,102 @@ class Mocker {
     }
 }
 
+class ApiProxy {
+    String name
+    String description
+    String version
+    String basePath
+    String errorCode
+
+    String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("class ApiProxy {\n");
+        sb.append("    name: ").append(name).append("\n");
+        sb.append("    description: ").append(description).append("\n");
+        sb.append("    version: ").append(version).append("\n");
+        sb.append("    basePath: ").append(basePath).append("\n");
+        sb.append("    errorCode: ").append(errorCode).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+}
+
+class ApiProxyProcessor {
+
+    private OpenAPI api
+    private ApiProxy proxy
+
+    ApiProxyProcessor(OpenAPI api){
+        this.api = api
+        this.proxy = new ApiProxy()
+    }
+
+    ApiProxy getProxy(){
+        return proxy
+    }
+
+    void show(){
+        settingInfo()
+        settingServer()
+        settingPaths()
+        System.out.println(proxy.toString())
+    }
+
+    void settingInfo(){
+        proxy.setName(api.getInfo().getTitle())
+        proxy.setDescription(api.getInfo().getTitle()+" - "+api.getInfo().getDescription())
+        proxy.setVersion(api.getInfo().getVersion())
+    }
+
+    void settingServer(){
+        URL server = new URL(api.getServers().get(0).getUrl());
+        proxy.setBasePath(server.getPath())
+    }
+
+    void settingPaths(){
+        for (String path: api.getPaths().keySet()){
+            System.out.println("Path: "+path);
+            for (PathItem.HttpMethod verb: api.getPaths().get(path).readOperationsMap().keySet()){
+                System.out.println("\tVerbo: "+verb);
+                Operation operation = api.getPaths().get(path).readOperationsMap().get(verb)
+                List<Parameter> parameters = operation.getParameters()
+                System.out.println("\tParameters: "+parameters);
+                System.out.println("\tRequestBody: ");
+                /*for (String mediaTypeKey: operation.getRequestBody().getContent().keySet()){
+                    System.out.println("\t\tMediaType: "+mediaTypeKey);
+                    MediaType mediaType = operation.getRequestBody().getContent().get(mediaTypeKey)
+                    if(mediaType.getSchema().getType()==null){
+                        System.out.println("\t\t\tMediaType: "+mediaType.getSchema().get$ref())
+                        for(String keySchema: api.getComponents().getSchemas().keySet()){
+                            System.out.println("\t\t\t\tComponenst Schema key: "+keySchema)
+                        }
+                    } else {
+                        System.out.println("\t\tMediaType: "+mediaType);
+                    }
+                }*/
+            }
+        }
+    }
+}
+
+def run(String cmd) {
+    def process = cmd.execute(null, dir)
+    process.waitForProcessOutput((Appendable)System.out, System.err)
+    if (process.exitValue() != 0) {
+        throw new Exception("Command '$cmd' exited with code: ${process.exitValue()}")
+    }
+}
+
+/**
+* Gerador de API Apigee
+*
+*
+**/
+System.setProperty("file.encoding","UTF-8");
+Field charset = Charset.class.getDeclaredField("defaultCharset");
+charset.setAccessible(true);
+charset.set(null,null);
+
 final ArchetypeGenerationRequest req = request
 final OpenAPI openAPI
 final String data
@@ -463,6 +580,7 @@ final String specAuthType = req.getProperties().get("spec-auth-type")
 final ProfileSetup profileSetup = new ProfileSetup(req.getProperties())
 final Map<String, Map<String, Object>> profiles = profileSetup.getSetup()
 final Properties properties = new Properties()
+
 properties.putAll(req.getProperties())
 properties.put("setupMap", profiles)
 properties.put("profiles", profiles.keySet())
@@ -500,6 +618,12 @@ if(StringUtils.isNotBlank(version)){
     properties.put("apiversion", version)
 }
 
+//Define o errorCode
+if(req.artifactId.indexOf("-")>-1){
+    String errorCode = req.artifactId.toUpperCase().split("-")[1]
+    properties.put("errorCode", errorCode)
+}
+
 //Obter o email pelo Swagger
 Contact contact = openAPI.getInfo().getContact()
 if (contact != null){
@@ -516,13 +640,22 @@ for (String path: openAPI.getPaths().keySet()) {
         Operation operation = openAPI.getPaths().get(path).readOperationsMap().get(verb)
         APIProxyFlow flow = new APIProxyFlow()
         flow.setName(operation.getOperationId()!=null?operation.getOperationId():"")
-        flow.setDesc(operation.getSummary())
+        flow.setDesc(new String(operation.getSummary().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8))
         flow.setPath(path)
         flow.setVerb(verb.toString())
         flows.add(flow)
     }
 }
 properties.put("flows", flows)
+
+ApiProxyProcessor apiProxyProcessor = new ApiProxyProcessor(openAPI)
+apiProxyProcessor.show()
+
+//Define o basePath
+//String basePath = apiProxyProcessor.getProxy().getBasePath()
+//if(StringUtils.isNotBlank(basePath)){
+//    properties.put("basePath", basePath)
+//}
 
 File outputDirectory = new File(req.outputDirectory)
 File projectDir = new File(outputDirectory, req.artifactId)
@@ -531,7 +664,8 @@ docDir.mkdirs()
 
 File specFile = new File(docDir, new File(specUrl.getFile()).getName())
 properties.put("specFileName", specFile.getName())
-FileWriter fw = new FileWriter(specFile)
+//FileWriter fw = new FileWriter(specFile)
+OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(specFile),"UTF-8");
 fw.write(data)
 fw.close()
 if (StringUtils.isNotBlank(properties.getProperty("templateDir")) && !"\${empty.templateDir}".equalsIgnoreCase(properties.getProperty("templateDir"))) {

@@ -8,6 +8,18 @@
                 <Name>RF-MethodNotAllowed</Name>
             </Step>
         </FaultRule>
+        <FaultRule name="internalServerErrorFault">
+            <Condition>message.status.code = 500</Condition>
+            <Step>
+                <Name>RF-InternalServerError</Name>
+            </Step>
+        </FaultRule>
+        <FaultRule name="unsupportedMediaTypeFault">
+            <Condition>initial.contentType !~~ "(application)\/(json.*|([a-z]*\+json.*)|([a-z]*\+xml.*)|xml.*)"</Condition>
+            <Step>
+                <Name>RF-UnsupportedMediaType</Name>
+            </Step>
+        </FaultRule>
     </FaultRules>
     <PreFlow name="PreFlow">
         <Request/>
@@ -19,8 +31,8 @@
     </PostFlow>
     <Flows>
     #foreach($flow in $flows)
-        <Flow name="$flow.name">
-            <Description>${StandardCharsets.UTF_8.decode($flow.desc).toString()}</Description>
+    <Flow name="${flow.name}">
+            <Description>${flow.desc}</Description>
             <Condition>(proxy.pathsuffix MatchesPath "${flow.path.replaceAll("\{.*?\}", "*")}") and (request.verb = "${flow.verb}")</Condition>
             <Request>
                 <Step>
@@ -29,10 +41,62 @@
                 </Step>
                 <Step>
                     <Condition>request.header.Accept.values.string !~~ "(.*\*/\*.*)|(text|application)/(xml.*|json.*|([a-z]*+json.*))"</Condition>
-                    <Name>RF-NotAcceptable-406</Name>
+                    <Name>RF-NotAcceptable</Name>
                 </Step>
+                <Step>
+                    <Name>JS-InitValidations</Name>
+                </Step>
+                #if($tsContentType == "XML")
+                <Step>
+                    <Name>JX-JsonToXml</Name>
+                </Step>
+                #end
+                <Step>
+                    <Condition>init.validation.status.code = 400</Condition>
+                    <Name>RF-BadRequest</Name>
+                </Step>
+                #if($tsContentType == "XML")
+                <Step>
+                    <Name>XT-TransformToRequest</Name>
+                </Step>
+                <Step>
+                    <Name>AM-SetContent</Name>
+                </Step>
+                #end
             </Request>
-            <Response/>
+            <Response>
+                #if($tsContentType == "JSON")
+                <Step>
+                    <Name>JS-ValidateResponse</Name>
+                </Step>
+                <Step>
+                    <Name>JS-SettingFailResponse</Name>
+                    <Condition>(isSuccessResponse = false)</Condition>
+                </Step>
+                <Step>
+                    <Name>JS-SettingResponse</Name>
+                    <Condition>(isSuccessResponse = true)</Condition>
+                </Step>
+                #elseif($tsContentType == "XML")
+                <Step>
+                    <Name>EV-ExtractFaultString</Name>
+                    <Condition>(response.content != null)</Condition>
+                </Step>
+                <Step>
+                    <Name>JS-ValidateResponse</Name>
+                </Step>
+                <Step>
+                    <Name>XT-TransformToFault</Name>
+                    <Condition>(isSuccessResponse = false)</Condition>
+                </Step>
+                <Step>
+                    <Name>XT-TransformToResponse</Name>
+                </Step>
+                <Step>
+                    <Name>XJ-SetResponse</Name>
+                </Step>
+                #end
+            </Response>
         </Flow>
     #end
         <Flow name="OPTIONS">
@@ -52,7 +116,7 @@
         </Flow>
     </Flows>
     <HTTPProxyConnection>
-        <BasePath>${basepath}</BasePath>
+        <BasePath>${basePath}</BasePath>
         <VirtualHost>secure</VirtualHost>
     </HTTPProxyConnection>
     <RouteRule name="default">

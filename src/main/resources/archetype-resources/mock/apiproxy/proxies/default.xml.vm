@@ -7,7 +7,8 @@
         <Response/>
     </PreFlow>
     <PostFlow name="PostFlow">
-        <Request/>
+        <Request>
+        </Request>
         <Response>
             <Step>
                 <Name>JS-MockResponse</Name>
@@ -16,7 +17,9 @@
     </PostFlow>
     <Flows/>
     <HTTPProxyConnection>
-        <BasePath>/mock${basepath}</BasePath>
+        <BasePath>/mock${targeturl}</BasePath>
+        <Properties/>
+        <VirtualHost>default</VirtualHost>
         <VirtualHost>secure</VirtualHost>
     </HTTPProxyConnection>
     <RouteRule name="noroute"/>

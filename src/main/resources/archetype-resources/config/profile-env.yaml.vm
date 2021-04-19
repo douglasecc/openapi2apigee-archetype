@@ -21,7 +21,7 @@ northbound:
   protocol: ${setupMap.get($profile).get('proxyscheme')}
   scheme: ${setupMap.get($profile).get('proxyscheme')}
   port: ${setupMap.get($profile).get('proxyport')}
-  basePath: ${basepath}
+  basePath: ${basePath}
   virtualhost: ${setupMap.get($profile).get('virtualhost')}
 
 targetEndpoint:

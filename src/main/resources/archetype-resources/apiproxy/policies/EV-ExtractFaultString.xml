@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ExtractVariables async="false" continueOnError="false" enabled="true" name="EV-ExtractFaultString">
+    <DisplayName>EV-ExtractFaultString</DisplayName>
+    <Properties/>
+    <Source>response</Source>
+    <XMLPayload stopPayloadProcessing="false">
+        <Namespaces>
+            <Namespace prefix="soapenv">http://schemas.xmlsoap.org/soap/envelope/</Namespace>
+            <Namespace prefix="soap-env">http://schemas.xmlsoap.org/soap/envelope/</Namespace>
+            <Namespace prefix="v1">http://www.claro.com.br/EBS/Claro/v1</Namespace>
+            <Namespace prefix="v11">http://www.claro.com.br/EBO/Claro/v1</Namespace>
+        </Namespaces>
+        <Variable name="isParametroInvalidoFault" type="boolean">
+            <XPath>count(//v1:ParametroInvalidoFault) &gt; 0</XPath>
+        </Variable>
+        <Variable name="isTechnicalFault" type="boolean">
+            <XPath>count(//v1:TechnicalFault) &gt; 0</XPath>
+        </Variable>
+        <Variable name="isSuccessResponse" type="boolean">
+            <XPath>count(//v1:Response) &gt; 0</XPath>
+        </Variable>
+    </XMLPayload>
+</ExtractVariables>

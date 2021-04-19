@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<XSL async="false" continueOnError="false" enabled="true" name="XT-TransformToFault">
+    <DisplayName>XT-TransformToFault</DisplayName>
+    <Properties/>
+    <Source>response</Source>
+    <ResourceURL>xsl://XT-TransformToFault.xsl</ResourceURL>
+    <Parameters ignoreUnresolvedVariables="true">
+        <Parameter name="apiVersion" ref="apiVersion"/>
+        <Parameter name="transactionId" ref="transactionId"/>
+        <Parameter name="isParametroInvalidoFault" ref="isParametroInvalidoFault"/>
+        <Parameter name="isTechnicalFault" ref="isTechnicalFault"/>
+    </Parameters>
+    <OutputVariable/>
+</XSL>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <APIProxy revision="1" name="${artifactId}-mock">
-    <BasePaths>/mock${basepath}</BasePaths>
+    <Basepaths>/mock${targeturl}</Basepaths>
     <ConfigurationVersion majorVersion="4" minorVersion="0"/>
     <DisplayName>${artifactId}-mock</DisplayName>
     <Description>API description - Mock backend for ${artifactId}</Description>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<XMLToJSON async="false" continueOnError="false" enabled="true" name="XJ-SetResponse">
+    <DisplayName>XJ-SetResponse</DisplayName>
+    <Options>
+        <RecognizeNumber>true</RecognizeNumber>
+        <RecognizeBoolean>true</RecognizeBoolean>
+        <RecognizeNull>true</RecognizeNull>
+        <NullValue>NULL</NullValue>
+        <TextNodeName>TEXT</TextNodeName>
+        <AttributePrefix>@</AttributePrefix>
+        <StripLevels>2</StripLevels>
+    </Options>
+    <OutputVariable>response</OutputVariable>
+    <Source>response</Source>
+</XMLToJSON>

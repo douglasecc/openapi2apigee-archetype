@@ -1,28 +1,50 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <APIProxy revision="2" name="${artifactId}">
+    <Basepaths>${basePath}</Basepaths>
     <ConfigurationVersion majorVersion="4" minorVersion="0"/>
-    <DisplayName>${artifactId}</DisplayName>
     #if (${description})
         <Description>${description}</Description>
     #else
         <Description>API description - ${artifactId}</Description>
     #end
-    <Basepaths>${basepath}</Basepaths>
+    <DisplayName>${artifactId}</DisplayName>
     <Policies>
         <Policy>AM-SetAcceptHeader</Policy>
+        <Policy>AM-SetContent</Policy>
         <Policy>FC-BackendConfiguration</Policy>
         <Policy>JS-InitValidations</Policy>
+        <Policy>JS-SettingResponse</Policy>
+        <Policy>JS-SettingFailResponse</Policy>
+        <Policy>JS-ValidateResponse</Policy>
+        <Policy>RF-BadRequest</Policy>
         <Policy>RF-BusinessFault</Policy>
+        <Policy>RF-InternalServerError</Policy>
         <Policy>RF-MethodNotAllowed</Policy>
         <Policy>RF-NotAcceptable</Policy>
         <Policy>RF-PathNotFound</Policy>
-        <Policy>RF-UnsupportedMediaType.xml</Policy>
+        <Policy>RF-UnsupportedMediaType</Policy>
+        #if($tsContentType == "XML")
+        <Policy>EV-ExtractFaultString</Policy>
+        <Policy>JX-JsonToXml</Policy>
+        <Policy>XJ-SetResponse</Policy>
+        <Policy>XT-TransformToFault</Policy>
+        <Policy>XT-TransformToRequest</Policy>
+        <Policy>XT-TransformToResponse</Policy>
+        #end
     </Policies>
     <ProxyEndpoints>
         <ProxyEndpoint>default</ProxyEndpoint>
     </ProxyEndpoints>
     <Resources>
+        #if($tsContentType == "XML")
+        <Resource>xsl://XT-TransformToFault.xsl</Resource>
+        <Resource>xsl://XT-TransformToRequest.xsl</Resource>
+        <Resource>xsl://XT-TransformToResponse.xsl</Resource>
+        #end
         <Resource>jsc://JS-InitValidations.js</Resource>
+        <Resource>jsc://JS-SettingFailResponse.js</Resource>
+        <Resource>jsc://JS-SettingResponse.js</Resource>
+        <Resource>jsc://JS-ValidateResponse.js</Resource>
     </Resources>
     <Spec/>
     <TargetServers/>

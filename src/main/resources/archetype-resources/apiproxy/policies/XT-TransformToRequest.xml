@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<XSL async="false" continueOnError="false" enabled="true" name="XT-TransformToRequest">
+    <DisplayName>XT-TransformToRequest</DisplayName>
+    <Properties/>
+    <Source>request</Source>
+    <ResourceURL>xsl://XT-TransformToRequest.xsl</ResourceURL>
+    <Parameters ignoreUnresolvedVariables="true">
+        <Parameter name="appCodeOrigin" ref="clientAuth.Data.developer.app.name"/>
+        <Parameter name="transactionId" ref="transactionId"/>
+        <Parameter name="remoteAddr" ref="proxy.client.ip"/>
+    </Parameters>
+    <OutputVariable/>
+</XSL>

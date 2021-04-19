@@ -1,0 +1,127 @@
+{
+    "${emailDev}": [
+        {
+            "name": "${artifactId}-app",
+            "apiProducts": [
+                "${artifactId}-product"
+            ],
+            "callbackUrl": "",
+            "scopes": [],
+            "attributes": [
+                {
+                    "name": "DisplayName",
+                    "value": "${artifactId}-app"
+                },
+                {
+                    "name": "Description",
+                    "value": "App for ${artifactId}-product"
+                },
+                {
+                    "name": "authtype",
+#if($authtype == "apikey")
+                    "value": "key"
+#elseif($authtype == "basic")
+                    "value": "basic"
+#elseif($authtype == "oauth2")
+                    "value": "oauth"
+#end
+                },
+                {
+                    "name": "apptype",
+#if($authtype == "apikey")
+                    "value": "public"
+#else
+                    "value": "confidential"
+                },
+                {
+                    "name": "allowedips",
+                    "value": "0.0.0.0/1"
+#end
+                }
+            ],
+            "status": "approved"
+        },
+        {
+            "name": "${artifactId}-app-nq",
+            "apiProducts": [
+                "${artifactId}-product-nq"
+            ],
+            "callbackUrl": "",
+            "scopes": [],
+            "attributes": [
+                {
+                    "name": "DisplayName",
+                    "value": "${artifactId}-app-nq"
+                },
+                {
+                    "name": "Description",
+                    "value": "App for ${artifactId}-product-nq"
+                },
+                {
+                    "name": "authtype",
+#if($authtype == "apikey")
+                    "value": "key"
+#elseif($authtype == "basic")
+                    "value": "basic"
+#elseif($authtype == "oauth2")
+                    "value": "oauth"
+#end
+                },
+                {
+                    "name": "apptype",
+#if($authtype == "apikey")
+                    "value": "public"
+#else
+                    "value": "confidential"
+                },
+                {
+                    "name": "allowedips",
+                    "value": "0.0.0.0/1"
+#end
+                }
+            ],
+            "status": "approved"
+        },
+        {
+            "name": "${artifactId}-app-np",
+            "apiProducts": [
+                "${artifactId}-product-np"
+            ],
+            "callbackUrl": "",
+            "scopes": [],
+            "attributes": [
+                {
+                    "name": "DisplayName",
+                    "value": "${artifactId}-app-np"
+                },
+                {
+                    "name": "Description",
+                    "value": "App for ${artifactId}-product-np"
+                },
+                {
+                    "name": "authtype",
+#if($authtype == "apikey")
+                    "value": "key"
+#elseif($authtype == "basic")
+                    "value": "basic"
+#elseif($authtype == "oauth2")
+                    "value": "oauth"
+#end
+                },
+                {
+                    "name": "apptype",
+#if($authtype == "apikey")
+                    "value": "public"
+#else
+                    "value": "confidential"
+                },
+                {
+                    "name": "allowedips",
+                    "value": "0.0.0.0/1"
+#end
+                }
+            ],
+            "status": "approved"
+        }
+    ]
+}

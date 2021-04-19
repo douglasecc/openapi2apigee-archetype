@@ -66,6 +66,12 @@ try {
                     lError      = true;
                 }
             }
+            var jsonBody = JSON.parse(contentBody);
+            if(jsonBody.data){
+                var reqData = jsonBody.data;
+                context.setVariable("request.content", JSON.stringify(reqData));
+                context.setVariable("request.header.content-length", JSON.stringify(reqData).length);
+            }
         }
     }
 

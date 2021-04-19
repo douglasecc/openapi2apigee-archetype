@@ -19,7 +19,7 @@
         <LoadBalancer>
             <Server name="TS-${targetServer}"/>
         </LoadBalancer>
-        <Path>${basepath}</Path>
+        <Path>${targeturl}</Path>
         <Properties>
             <Property name="success.codes">${successCodes}</Property>
             <Property name="supports.http11">true</Property>
