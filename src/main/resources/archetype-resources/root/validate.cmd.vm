@@ -1,0 +1,6 @@
+@echo off
+rm -f ${artifactId}.zip
+7z a -tzip ${artifactId}.zip -r *.* -x!.git -x!tests\node_modules\*.*
+;;curl -F qa-apigee-swagger-file=@specs\${artifactId}.json -H "Host: validator.apigw.claro.com.br" http://10.54.17.2/apigee_validator/swagger/validate > ./validator.json
+curl -v -F qa-apigee-repo-file=@${artifactId}.zip http://10.54.17.2/apigee_validator/apigee/validate > ./validator.json
+cat validator.json

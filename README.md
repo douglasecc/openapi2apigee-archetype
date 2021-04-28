@@ -33,7 +33,7 @@ Maven plugins in generated project
 ## archetype parameters
 | parameter                    | required | description                                                                    | default                              |
 | -----------                  | -------- | -----------                                                                    | -------                              |
-| archetypeGroupId             | yes      | must be provided fixed to: com.github.iarellano                                |                                      |
+| archetypeGroupId             | yes      | must be provided fixed to: com.github.douglasecc                               |                                      |
 | DarchetypeArtifactId         | yes      | must be provided fixed to: openapi2apigee-archetype                            |                                      |
 | interactiveMode              | no       | recomended for automatic jobs: false                                           | true                                 |
 | groupId                      | yes      | your company or business domain name, it will be your groupId in your pom.xml  |                                      |

@@ -1,0 +1,7 @@
+GET http://jenkins.prod.k8s.claro.com.br/job/Apigee/job/Mobile/job/TMForum/job/Customer/job/mobile-creditanalysis-v1/build?delay=0  HTTP/1.1
+Authorization: Basic t7138466:M@st3r@2504
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36
+Accept: application/json
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+
+###

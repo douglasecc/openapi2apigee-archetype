@@ -4,7 +4,9 @@
 /tests/reports
 tests/package-lock.json
 mock/*.zip
+reports/unit-report.json
 *.zip
 *.bat
 *.cmd
-reports/unit-report.json
+*.http
+*.rest 
